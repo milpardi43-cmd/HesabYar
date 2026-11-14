@@ -107,4 +107,6 @@ data class SaleItemSnapshot(
     val totalAmount: Toman,
     val returnedQuantity: Quantity,
     val returnedDiscountAmount: Toman = 0,
-)
+) {
+    val cogs: Toman get() = quantity * unitCostSnapshot
+}

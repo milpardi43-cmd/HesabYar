@@ -117,7 +117,7 @@ fun TransactionDetailScreen(id: Long, settings: AppSettings, navController: NavC
             })
             if (t.remainingAmount > 0 && t.contactId != null && t.status == TransactionStatus.POSTED) {
                 val direction = if (t.type == TransactionType.PURCHASE || t.type == TransactionType.EXPENSE) "pay" else "receive"
-                HyButton("تسویه مانده", { navController.navigate(Routes.payment(t.contactId, direction)) })
+                HyButton("تسویه مانده", { navController.navigate(Routes.payment(t.contactId!!, direction)) })
             }
             if (t.type in setOf(TransactionType.CASH_SALE, TransactionType.CREDIT_SALE, TransactionType.MIXED_SALE) && t.status == TransactionStatus.POSTED) {
                 HyOutlinedButton("برگشت فروش", { navController.navigate(Routes.returnRoute(t.id)) })

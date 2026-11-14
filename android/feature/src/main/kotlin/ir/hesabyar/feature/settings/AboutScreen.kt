@@ -10,6 +10,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import ir.hesabyar.core.design.*
+import ir.hesabyar.feature.common.HyScreen
 
 @Composable
 fun AboutScreen(navController: NavController) {
