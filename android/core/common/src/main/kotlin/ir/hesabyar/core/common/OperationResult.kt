@@ -21,6 +21,8 @@ inline fun <T> runOperation(block: () -> T): OperationResult<T> = try {
     OperationResult.Failure(AppError.NotFound(e.message ?: "موردی پیدا نشد."))
 } catch (e: ConflictException) {
     OperationResult.Failure(AppError.Conflict(e.message ?: "این عملیات قبلاً ثبت شده است."))
+} catch (e: kotlinx.coroutines.CancellationException) {
+    throw e
 } catch (e: Exception) {
     OperationResult.Failure(AppError.Storage("خطا در ذخیره‌سازی اطلاعات.", e))
 }

@@ -59,6 +59,23 @@ jobs:
                   break
           PY
           exit $status
+      - name: Annotate test failures
+        if: failure()
+        run: |
+          python3 - <<'PY'
+          import glob, xml.etree.ElementTree as ET
+          for path in glob.glob('**/build/test-results/**/*.xml', recursive=True):
+              try:
+                  root = ET.parse(path).getroot()
+              except Exception:
+                  continue
+              for case in root.iter('testcase'):
+                  for fail in list(case.iter('failure')) + list(case.iter('error')):
+                      msg = (fail.get('message') or '')[:500]
+                      text = (fail.text or '')[:700]
+                      line = f"{case.get('classname')}.{case.get('name')}: {msg} {text}"
+                      print('::error::' + line.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A'))
+          PY
       - name: Upload build log
         if: always()
         uses: actions/upload-artifact@v4

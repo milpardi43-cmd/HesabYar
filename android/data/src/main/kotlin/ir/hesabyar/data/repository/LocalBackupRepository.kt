@@ -21,7 +21,7 @@ class LocalBackupRepository(private val context: Context, private val db: HesabY
 
     override suspend fun createBackup(): OperationResult<String> = runOperation {
         val businessId = db.businessDao().observeFirst().first()?.id ?: error("کسب‌وکار پیدا نشد.")
-        db.openHelper.writableDatabase.execSQL("PRAGMA wal_checkpoint(TRUNCATE)")
+        db.openHelper.writableDatabase.query("PRAGMA wal_checkpoint(TRUNCATE)").use { it.moveToFirst() }
         val source = context.getDatabasePath("hesabyar.db")
         val dir = File(context.filesDir, "backups").apply { mkdirs() }
         val stamp = SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(Date())
@@ -34,7 +34,9 @@ class LocalBackupRepository(private val context: Context, private val db: HesabY
 
     override suspend fun restoreBackup(uri: String): OperationResult<Unit> = runOperation {
         val temp = File(context.cacheDir, "restore-validate.db")
-        context.contentResolver.openInputStream(Uri.parse(uri))?.use { input -> temp.outputStream().use { input.copyTo(it) } }
+        val parsed = Uri.parse(uri)
+        val stream = if (parsed.scheme == "file") File(parsed.path ?: "").inputStream() else context.contentResolver.openInputStream(parsed)
+        stream?.use { input -> temp.outputStream().use { input.copyTo(it) } }
             ?: error("فایل پشتیبان قابل خواندن نیست.")
         validateDatabase(temp)
         db.close()
