@@ -32,19 +32,31 @@ jobs:
       - name: Verify and build
         run: |
           set +e
-          ./gradlew :core:common:test :core:calendar:test :core:currency:test :core:validation:test :domain:test :core:database:assembleDebug :data:assembleDebug :billing:assembleDebug :core:design:assembleDebug :app:assembleDebug :app:bundleRelease --stacktrace --no-daemon --console=plain > build.log 2>&1
+          ./gradlew :core:common:test :core:calendar:test :core:currency:test :core:validation:test :domain:test :core:database:assembleDebug :data:assembleDebug :billing:assembleDebug :core:design:assembleDebug :feature:assembleDebug :data:testDebugUnitTest :app:assembleDebug :app:bundleRelease --stacktrace --no-daemon --console=plain > build.log 2>&1
           status=$?
           tail -n 220 build.log
           python3 - <<'PY'
-          import re, pathlib
-          log = pathlib.Path('build.log').read_text(errors='replace')
+          import pathlib
+          lines = pathlib.Path('build.log').read_text(errors='replace').splitlines()
+          selected = []
+          for i, line in enumerate(lines):
+              if line.startswith('e: ') or 'Unresolved reference' in line or 'error:' in line.lower() or 'Could not' in line or 'Exception' in line:
+                  selected.append(line)
+              if line.startswith('* What went wrong:'):
+                  selected.extend(lines[i:i+18])
+          if not selected:
+              selected = lines[-60:]
           seen = set()
-          for line in log.splitlines():
-              if line.startswith('e: ') or 'error:' in line.lower() or line.startswith('FAILURE:') or line.startswith('* What went wrong:'):
-                  msg = line.strip()[:900]
-                  if msg not in seen:
-                      seen.add(msg)
-                      print('::error::' + msg.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A'))
+          count = 0
+          for line in selected:
+              msg = line.strip()[:900]
+              if not msg or msg in seen:
+                  continue
+              seen.add(msg)
+              print('::error::' + msg.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A'))
+              count += 1
+              if count >= 45:
+                  break
           PY
           exit $status
       - name: Upload build log
