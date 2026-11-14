@@ -1,0 +1,6 @@
+<resources>
+    <style name="Theme.HesabYar" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">#124A37</item>
+        <item name="android:navigationBarColor">#FFFFFF</item>
+    </style>
+</resources>

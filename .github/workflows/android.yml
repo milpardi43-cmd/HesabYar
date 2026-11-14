@@ -1,0 +1,39 @@
+name: Android Native CI
+
+on:
+  push:
+    branches: ['arena/9acc339c-hesabyar']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build native Android
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: android
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Accept SDK licenses
+        run: yes | sdkmanager --licenses || true
+      - name: Build debug APK and release AAB
+        run: ./gradlew :app:assembleDebug :app:bundleRelease --stacktrace --no-daemon
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: hesabyar-debug-apk
+          path: android/app/build/outputs/apk/debug/*.apk
+      - name: Upload AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: hesabyar-release-aab
+          path: android/app/build/outputs/bundle/release/*.aab
