@@ -24,23 +24,43 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
       - name: Prepare Android SDK
         run: |
-          echo "ANDROID_HOME=$ANDROID_HOME"
-          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
           SDKMANAGER="${ANDROID_HOME:-$ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager"
           if [ -x "$SDKMANAGER" ]; then
             yes | "$SDKMANAGER" --licenses || true
             "$SDKMANAGER" "platforms;android-35" "build-tools;35.0.0" "platform-tools"
-          else
-            echo "sdkmanager not found; relying on preinstalled SDK"
           fi
-      - name: Build debug APK and release AAB
-        run: ./gradlew :app:assembleDebug :app:bundleRelease --stacktrace --no-daemon
+      - name: Verify and build
+        run: |
+          set +e
+          ./gradlew :core:common:test :core:calendar:test :core:currency:test :core:validation:test :domain:test :core:database:assembleDebug :data:assembleDebug :billing:assembleDebug :core:design:assembleDebug :app:assembleDebug :app:bundleRelease --stacktrace --no-daemon --console=plain > build.log 2>&1
+          status=$?
+          tail -n 220 build.log
+          python3 - <<'PY'
+          import re, pathlib
+          log = pathlib.Path('build.log').read_text(errors='replace')
+          seen = set()
+          for line in log.splitlines():
+              if line.startswith('e: ') or 'error:' in line.lower() or line.startswith('FAILURE:') or line.startswith('* What went wrong:'):
+                  msg = line.strip()[:900]
+                  if msg not in seen:
+                      seen.add(msg)
+                      print('::error::' + msg.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A'))
+          PY
+          exit $status
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-build-log
+          path: android/build.log
       - name: Upload APK
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: hesabyar-debug-apk
           path: android/app/build/outputs/apk/debug/*.apk
       - name: Upload AAB
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: hesabyar-release-aab
