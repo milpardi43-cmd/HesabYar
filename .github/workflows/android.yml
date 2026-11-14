@@ -32,7 +32,7 @@ jobs:
       - name: Verify and build
         run: |
           set +e
-          ./gradlew :core:common:test :core:calendar:test :core:currency:test :core:validation:test :domain:test :core:database:assembleDebug :data:assembleDebug :billing:assembleDebug :core:design:assembleDebug :feature:assembleDebug :data:testDebugUnitTest :app:assembleDebug :app:bundleRelease --stacktrace --no-daemon --console=plain > build.log 2>&1
+          ./gradlew :core:common:test :core:calendar:test :core:currency:test :core:validation:test :domain:test :core:database:assembleDebug :data:assembleDebug :billing:assembleDebug :core:design:assembleDebug :feature:assembleDebug :feature:testDebugUnitTest :data:testDebugUnitTest :app:assembleDebug :app:bundleRelease --stacktrace --no-daemon --console=plain > build.log 2>&1
           status=$?
           tail -n 220 build.log
           python3 - <<'PY'
