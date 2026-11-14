@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -40,7 +40,7 @@ jobs:
           lines = pathlib.Path('build.log').read_text(errors='replace').splitlines()
           selected = []
           for i, line in enumerate(lines):
-              if line.startswith('e: ') or 'Unresolved reference' in line or 'error:' in line.lower() or 'Could not' in line or 'Exception' in line:
+              if line.startswith('e: ') or 'Unresolved reference' in line or 'error:' in line.lower() or 'Could not' in line or 'Exception' in line or 'AssertionError' in line or 'expected' in line or 'but was' in line:
                   selected.append(line)
               if line.startswith('* What went wrong:'):
                   selected.extend(lines[i:i+18])
@@ -77,3 +77,14 @@ jobs:
         with:
           name: hesabyar-release-aab
           path: android/app/build/outputs/bundle/release/*.aab
+
+      - name: Publish release assets
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="v0.1.0-native"
+          cp app/build/outputs/apk/debug/app-debug.apk hesabyar-debug.apk
+          cp app/build/outputs/bundle/release/app-release.aab hesabyar-release.aab
+          gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1 ||             gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA"               --title "HesabYar Android Native 0.1.0"               --notes "Native Kotlin/Compose build. APK is debug-signed and installable. AAB is unsigned unless HY_KEYSTORE_PATH is configured; sign with a real upload key for Cafe Bazaar."
+          gh release upload "$TAG" hesabyar-debug.apk hesabyar-release.aab --clobber --repo "$GITHUB_REPOSITORY"
