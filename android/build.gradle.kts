@@ -7,3 +7,13 @@ plugins {
     alias(libs.plugins.ksp) apply false
     alias(libs.plugins.hilt) apply false
 }
+
+subprojects {
+    tasks.withType<Test>().configureEach {
+        testLogging {
+            events("failed", "skipped")
+            exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+            showStandardStreams = true
+        }
+    }
+}

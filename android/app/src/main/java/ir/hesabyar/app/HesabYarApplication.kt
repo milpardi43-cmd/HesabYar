@@ -13,8 +13,8 @@ import javax.inject.Inject
 class HesabYarApplication : Application(), Configuration.Provider {
     @Inject lateinit var workerFactory: HiltWorkerFactory
 
-    override val workManagerConfiguration: Configuration
-        get() = Configuration.Builder().setWorkerFactory(workerFactory).build()
+    override fun getWorkManagerConfiguration(): Configuration =
+        Configuration.Builder().setWorkerFactory(workerFactory).build()
 
     override fun onCreate() {
         super.onCreate()
