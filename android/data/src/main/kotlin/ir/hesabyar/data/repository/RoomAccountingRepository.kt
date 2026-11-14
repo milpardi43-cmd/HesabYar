@@ -9,6 +9,7 @@ import ir.hesabyar.data.mapper.toSnapshot
 import ir.hesabyar.domain.accounting.*
 import ir.hesabyar.domain.model.*
 import ir.hesabyar.domain.repository.AccountingRepository
+import ir.hesabyar.domain.repository.ExpenseDetail
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -426,6 +427,8 @@ class RoomAccountingRepository(private val db: HesabYarDatabase) : AccountingRep
     }
 
     override suspend fun getTransaction(id: Long): TransactionHeader? = db.transactionDao().getById(id)?.toDomain()
+    override suspend fun getSaleItems(transactionId: Long): List<SaleItemSnapshot> = db.saleDao().getItemsByTransaction(transactionId).map { SaleItemSnapshot(it.id, it.productId, it.quantity, it.unitPrice, it.unitCostSnapshot, it.discountAmount, it.totalAmount, it.returnedQuantity, it.returnedDiscountAmount) }
+    override suspend fun getExpense(transactionId: Long): ExpenseDetail? = db.expenseDao().getByTransaction(transactionId)?.let { ExpenseDetail(it.title, ExpenseCategory.valueOf(it.category), it.invoicePath) }
     override fun observeTransactions(businessId: Long): Flow<List<TransactionHeader>> = db.transactionDao().observeByBusiness(businessId).map { list -> list.map { it.toDomain() } }
     override fun observeRecent(businessId: Long, limit: Int): Flow<List<TransactionHeader>> = db.transactionDao().observeRecent(businessId, limit).map { list -> list.map { it.toDomain() } }
     override fun observeContactTransactions(contactId: Long): Flow<List<TransactionHeader>> = db.transactionDao().observeByContact(contactId).map { list -> list.map { it.toDomain() } }

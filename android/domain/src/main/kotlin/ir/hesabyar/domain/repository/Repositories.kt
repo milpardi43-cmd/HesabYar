@@ -26,11 +26,15 @@ interface AccountingRepository {
     suspend fun reverseTransaction(command: ReverseCommand): OperationResult<TransactionHeader>
     suspend fun adjustContact(command: ContactAdjustmentCommand): OperationResult<TransactionHeader>
     suspend fun getTransaction(id: Long): TransactionHeader?
+    suspend fun getSaleItems(transactionId: Long): List<SaleItemSnapshot>
+    suspend fun getExpense(transactionId: Long): ExpenseDetail?
     fun observeContactTransactions(contactId: Long): Flow<List<TransactionHeader>>
     fun observeTransactions(businessId: Long): Flow<List<TransactionHeader>>
     fun observeRecent(businessId: Long, limit: Int = 10): Flow<List<TransactionHeader>>
     suspend fun getTransactionsInRange(businessId: Long, from: Long, to: Long): List<TransactionHeader>
 }
+
+data class ExpenseDetail(val title: String, val category: ExpenseCategory, val invoicePath: String)
 
 interface ContactRepository {
     fun observeLedger(contactId: Long): Flow<List<ContactLedgerEntry>>

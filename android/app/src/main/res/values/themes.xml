@@ -3,4 +3,9 @@
         <item name="android:statusBarColor">#124A37</item>
         <item name="android:navigationBarColor">#FFFFFF</item>
     </style>
+    <style name="Theme.HesabYar.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#124A37</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher</item>
+        <item name="postSplashScreenTheme">@style/Theme.HesabYar</item>
+    </style>
 </resources>

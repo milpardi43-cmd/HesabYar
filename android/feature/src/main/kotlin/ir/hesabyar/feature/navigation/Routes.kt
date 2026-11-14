@@ -1,0 +1,33 @@
+package ir.hesabyar.feature.navigation
+
+object Routes {
+    const val DASHBOARD = "dashboard"
+    const val TRANSACTIONS = "transactions"
+    const val CONTACTS = "contacts"
+    const val PRODUCTS = "products"
+    const val REPORTS = "reports"
+    const val SETTINGS = "settings"
+    const val SALE = "sale"
+    const val PURCHASE = "purchase"
+    const val EXPENSE = "expense"
+    const val PAYMENT = "payment/{contactId}/{direction}"
+    const val RETURN = "return/{transactionId}"
+    const val TRANSACTION_DETAIL = "transaction/{id}"
+    const val CONTACT_DETAIL = "contact/{id}"
+    const val CONTACT_FORM = "contact-form?id={id}"
+    const val PRODUCT_DETAIL = "product/{id}"
+    const val PRODUCT_FORM = "product-form?id={id}"
+    const val ACCOUNTS = "accounts"
+    const val REMINDERS = "reminders"
+    const val BACKUP = "backup"
+    const val SUBSCRIPTION = "subscription"
+    const val ABOUT = "about"
+
+    fun payment(contactId: Long, direction: String) = "payment/$contactId/$direction"
+    fun returnRoute(transactionId: Long) = "return/$transactionId"
+    fun transaction(id: Long) = "transaction/$id"
+    fun contact(id: Long) = "contact/$id"
+    fun contactForm(id: Long? = null) = if (id == null) "contact-form" else "contact-form?id=$id"
+    fun product(id: Long) = "product/$id"
+    fun productForm(id: Long? = null) = if (id == null) "product-form" else "product-form?id=$id"
+}
